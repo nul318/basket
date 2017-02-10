@@ -9,12 +9,12 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
         android:orientation="vertical"
         android:gravity="left|center"
         android:layout_weight="1"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:layout_height="70dp">
 
         <TextView
             android:id="@+id/listview_nav_folder_title"
@@ -26,11 +26,11 @@
 
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
 
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             app:srcCompat="@drawable/file"
             android:id="@+id/imageView2"
             android:layout_centerVertical="true"
