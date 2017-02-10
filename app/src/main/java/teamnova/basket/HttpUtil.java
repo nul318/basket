@@ -41,7 +41,8 @@ public class HttpUtil {
         return this;
     }
     HttpUtil execute() {
-        new Execute().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//        new Execute().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new Execute().execute();
         return this;
     }
     private static class Execute extends AsyncTask<Object, Object, Void> {

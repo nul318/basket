@@ -20,6 +20,29 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer" />
+        app:menu="@menu/activity_main_drawer" >
+
+        <ListView
+            android:id="@+id/nav_list"
+            android:layout_width="wrap_content"
+            android:layout_height="386dp"
+            android:layout_gravity="bottom"
+            android:choiceMode="singleChoice"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"
+
+            android:background="#ffff"/>
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/add"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="200dp"
+            android:layout_marginBottom="20dp"
+            android:id="@+id/folder_add" />
+    </android.support.design.widget.NavigationView>
+
+
 
 </android.support.v4.widget.DrawerLayout>
+

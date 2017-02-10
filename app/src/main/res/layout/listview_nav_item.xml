@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:orientation="vertical"
+        android:gravity="left|center"
+        android:layout_weight="1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:id="@+id/listview_nav_folder_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="FOLDER TITLE"
+            android:textColor="#000000"
+            android:textStyle="bold"
+
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:srcCompat="@drawable/file"
+            android:id="@+id/imageView2"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="35dp" />
+
+    </RelativeLayout>
+
+
+</RelativeLayout>
