@@ -1,8 +1,14 @@
 package teamnova.basket;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +21,23 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.URL;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -28,6 +51,101 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        String user_id = "A";
+        String folder = "전체";
+        String uri;
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if(Intent.ACTION_SEND.equals(action) && type != null){
+            if("text/plain".equals(type)){
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+                uri = sharedText;
+                uri=UrlDetectionUtil.getURL(uri);
+                Toast.makeText(this, uri, Toast.LENGTH_SHORT).show();
+                HttpUtil httpUtil = new HttpUtil();
+                httpUtil.setUrl("http://52.79.189.195/nova-thon/basket/data/insert.php")
+                        .setCallback(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                e.printStackTrace();
+                                Log.e("RESPONSE", "dasadda");
+                                Log.e("RESPONSE", "dasadda");
+                                Log.e("RESPONSE", "dasadda");
+                                Log.e("RESPONSE", "dasadda");
+                                Log.e("RESPONSE", "dasadda");
+                                Log.e("RESPONSE", "dasadda");
+                                Log.e("RESPONSE", "dasadda");
+
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                        Log.e("RESPONSE", response.body().string());
+                                Log.e("RESPONSE", response.body().string());
+                                Log.e("RESPONSE", response.body().string());
+                                Log.e("RESPONSE", response.body().string());
+
+                            }
+                        })
+                        .setMethod(HttpUtil.HTTP_METHOD_POST)
+                        .setData("user_id", user_id)
+                        .setData("folder", folder)
+                        .setData("url", uri)
+                        .execute();
+
+            }
+        }
+
+
+
+        final Handler handler = new Handler();
+
+        HttpUtil httpUtil = new HttpUtil();
+        httpUtil.setUrl("http://52.79.189.195/nova-thon/basket/data/select.php")
+                .setCallback(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+//                        Log.e("RESPONSE", response.body().string());
+                        try {
+                            JSONArray jarray = new JSONArray(response.body().string());
+                            for(int i=0; i < jarray.length(); i++){
+                                final JSONObject jObject = jarray.getJSONObject(i);  // JSONObject 추출
+                                jObject.getString("contents");
+                                jObject.getString("image_path");
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            adapter.addItem(jObject.getString("title"),jObject.getString("contents"),jObject.getString("url"),jObject.getString("image_path") );
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                });
+
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                })
+                .setMethod(HttpUtil.HTTP_METHOD_POST)
+                .setData("user_id", user_id)
+                .setData("folder", folder)
+                .execute();
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -52,10 +170,6 @@ public class MainActivity extends AppCompatActivity
         listView =  (ListView) findViewById(R.id.main_Listview);
         listView.setAdapter(adapter);
 
-        adapter.addItem("여행갈 때 차에서 들려주는 동요 상어 가족 외 43곡 모음집 핑크퐁! 인기동요","youtube.com");
-        adapter.addItem("hello","hello");
-        adapter.notifyDataSetChanged();
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -65,7 +179,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         this.setTitle("");
-
 
     }
 
@@ -124,5 +237,12 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    protected void onResume(){
+        super.onResume();
+
+        adapter.notifyDataSetChanged();
+
     }
 }

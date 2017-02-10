@@ -5,7 +5,8 @@ import android.widget.ImageView;
 public class ListView_Item {
     String title;
     String conten;
-    ImageView image;
+    String address;
+    String image;
 
     public void setTitle(String Title){
         title = Title;
@@ -13,16 +14,21 @@ public class ListView_Item {
     public void setConten(String Conten){
         conten = Conten;
     }
-    public void setImage(ImageView Image){
+    public void setAddress(String Address){
+        address = Address;
+    }
+    public void setImage(String Image){
         image = Image;
     }
+
     public String getTitle(){
         return title;
     }
     public String getConten(){
         return conten;
     }
-    public ImageView getImage(){
+    public String getAddress(){return address;}
+    public String getImage(){
         return image;
     }
 }
