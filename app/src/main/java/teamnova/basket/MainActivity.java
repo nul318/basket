@@ -12,9 +12,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    ListView listView;
+    ListView_Adapter adapter = new ListView_Adapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +46,27 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+
+        listView =  (ListView) findViewById(R.id.main_Listview);
+        listView.setAdapter(adapter);
+
+        adapter.addItem("여행갈 때 차에서 들려주는 동요 상어 가족 외 43곡 모음집 핑크퐁! 인기동요","youtube.com");
+        adapter.addItem("hello","hello");
+        adapter.notifyDataSetChanged();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                adapter.removeItem(position);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        this.setTitle("");
+
+
     }
 
     @Override
@@ -67,7 +94,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_serach) {
             return true;
         }
 
