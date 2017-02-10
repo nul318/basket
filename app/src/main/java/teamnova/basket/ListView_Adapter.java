@@ -1,12 +1,10 @@
 package teamnova.basket;
 
 import android.content.Context;
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -58,5 +56,8 @@ public class ListView_Adapter extends BaseAdapter {
     }
     public void removeItem(int position){
         items.remove(position);
+    }
+    public void clear(){
+        items.clear();
     }
 }
