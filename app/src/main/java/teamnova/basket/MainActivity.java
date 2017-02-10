@@ -1,8 +1,10 @@
 package teamnova.basket;
 
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,13 +40,17 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    static String folder;
+    static String folder = "전체";
+    String user_id = "A";
+    Handler handler = new Handler();
+    boolean actvity_check = true;
+
 
     ListView listView;
     ListView_Adapter adapter = new ListView_Adapter();
     ListView_nav_Adapter adapter_nav = new ListView_nav_Adapter();
 
-    String user_id;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +58,183 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        user_id = "A";
+
+        String uri;
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+                uri = sharedText;
+                uri = UrlDetectionUtil.getURL(uri);
+                Toast.makeText(this, uri, Toast.LENGTH_SHORT).show();
+
+
+
+
+
+
+
+
+
+
+
+
+                HttpUtil httpUtil = new HttpUtil();
+                httpUtil.setUrl("http://52.79.189.195/nova-thon/basket/data/insert.php")
+                        .setCallback(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+
+                                Log.e("data_insert fail", e.toString());
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                                Log.e("action data_insert", response.body().string());
+
+
+                                HttpUtil httpUtil3 = new HttpUtil();
+                                httpUtil3.setUrl("http://52.79.189.195/nova-thon/basket/data/select.php")
+                                        .setCallback(new Callback() {
+                                            @Override
+                                            public void onFailure(Call call, IOException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                            @Override
+                                            public void onResponse(Call call, Response response) throws IOException {
+//                        Log.e("RESPONSE", response.body().string());
+                                                String hello = response.body().string();
+                                                Log.e("action data_select", hello);
+                                                try {
+                                                    JSONArray jarray = new JSONArray(hello);
+                                                    for (int i = 0; i < jarray.length(); i++) {
+                                                        final JSONObject jObject = jarray.getJSONObject(i);  // JSONObject 추출
+                                                        jObject.getString("contents");
+                                                        jObject.getString("image_path");
+                                                        handler.post(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                try {
+                                                                    adapter.addItem(jObject.getString("title"), jObject.getString("contents"), jObject.getString("url"), jObject.getString("image_path"));
+                                                                } catch (JSONException e) {
+                                                                    e.printStackTrace();
+                                                                }
+                                                                adapter.notifyDataSetChanged();
+                                                            }
+                                                        });
+
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+
+                                            }
+                                        })
+                                        .setMethod(HttpUtil.HTTP_METHOD_POST)
+                                        .setData("user_id", user_id)
+                                        .setData("folder", folder)
+                                        .execute();
+
+
+                            }
+                        })
+                        .setMethod(HttpUtil.HTTP_METHOD_POST)
+                        .setData("user_id", user_id)
+                        .setData("folder", folder)
+                        .setData("url", uri)
+                        .execute();
+
+            }
+        }else{
+
+            HttpUtil httpUtil3 = new HttpUtil();
+            httpUtil3.setUrl("http://52.79.189.195/nova-thon/basket/data/select.php")
+                    .setCallback(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+//                        Log.e("RESPONSE", response.body().string());
+                            String hello = response.body().string();
+                            Log.e("oncreate data_select", hello);
+                            try {
+                                JSONArray jarray = new JSONArray(hello);
+                                for (int i = 0; i < jarray.length(); i++) {
+                                    final JSONObject jObject = jarray.getJSONObject(i);  // JSONObject 추출
+                                    jObject.getString("contents");
+                                    jObject.getString("image_path");
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                adapter.addItem(jObject.getString("title"), jObject.getString("contents"), jObject.getString("url"), jObject.getString("image_path"));
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    });
+
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+
+                            HttpUtil httpUtil2 = new HttpUtil();
+                            httpUtil2.setUrl("http://52.79.189.195/nova-thon/basket/folder/select.php")
+                                    .setCallback(new Callback() {
+                                        @Override
+                                        public void onFailure(Call call, IOException e) {
+
+                                        }
+
+                                        @Override
+                                        public void onResponse(Call call, Response response) throws IOException {
+//                        Log.e("folder_select", response.body().string());
+                                            try {
+                                                JSONArray jarray = new JSONArray(response.body().string());
+                                                for (int i = 0; i < jarray.length(); i++) {
+                                                    final JSONObject jObject = jarray.getJSONObject(i);  // JSONObject 추출
+                                                    handler.post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            try {
+                                                                adapter_nav.addItem(jObject.getString("folder"));
+                                                            } catch (JSONException e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                            adapter_nav.notifyDataSetChanged();
+                                                        }
+                                                    });
+                                                }
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    })
+                                    .setMethod(HttpUtil.HTTP_METHOD_POST)
+                                    .setData("user_id", user_id)
+                                    .execute();
+
+                        }
+                    })
+                    .setMethod(HttpUtil.HTTP_METHOD_POST)
+                    .setData("user_id", user_id)
+                    .setData("folder", folder)
+                    .execute();
+
+        }
+
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -77,53 +260,58 @@ public class MainActivity extends AppCompatActivity
 
         nav_list_view.setAdapter(adapter_nav);
 
-        final Handler handler = new Handler();
 
-        HttpUtil httpUtil = new HttpUtil();
-        httpUtil.setUrl("http://52.79.189.195/nova-thon/basket/folder/select.php")
-                .setCallback(new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-//                        Log.e("RESPONSE", response.body().string());
-                        try {
-                            JSONArray jarray = new JSONArray(response.body().string());
-                            for(int i=0; i < jarray.length(); i++){
-                                final JSONObject jObject = jarray.getJSONObject(i);  // JSONObject 추출
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            adapter_nav.addItem(jObject.getString("folder") );
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                        adapter_nav.notifyDataSetChanged();
-                                    }
-                                });
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                })
-                .setMethod(HttpUtil.HTTP_METHOD_POST)
-                .setData("user_id", user_id)
-                .execute();
-
-
-
-        nav_list_view.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        nav_list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // TODO Auto-generated method stub
                 //Toast.makeText(getApplicationContext(), arDessert.get(position), Toast.LENGTH_SHORT).show();
                 folder = adapter_nav.getItem(position).toString();
+                adapter.clear();
+
+                HttpUtil httpUtil3 = new HttpUtil();
+                httpUtil3.setUrl("http://52.79.189.195/nova-thon/basket/data/select.php")
+                        .setCallback(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+//                        Log.e("RESPONSE", response.body().string());
+                                String hello = response.body().string();
+                                Log.e("action data_select", hello);
+                                try {
+                                    JSONArray jarray = new JSONArray(hello);
+                                    for (int i = 0; i < jarray.length(); i++) {
+                                        final JSONObject jObject = jarray.getJSONObject(i);  // JSONObject 추출
+                                        jObject.getString("contents");
+                                        jObject.getString("image_path");
+                                        handler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    adapter.addItem(jObject.getString("title"), jObject.getString("contents"), jObject.getString("url"), jObject.getString("image_path"));
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                adapter.notifyDataSetChanged();
+                                            }
+                                        });
+
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        })
+                        .setMethod(HttpUtil.HTTP_METHOD_POST)
+                        .setData("user_id", user_id)
+                        .setData("folder", folder)
+                        .execute();
 
             }
 
@@ -147,8 +335,8 @@ public class MainActivity extends AppCompatActivity
                                 // TODO Auto-generated method stub
 
 
-                                HttpUtil httpUtil = new HttpUtil();
-                                httpUtil.setUrl("http://52.79.189.195/nova-thon/basket/folder/insert.php")
+                                HttpUtil httpUtil4 = new HttpUtil();
+                                httpUtil4.setUrl("http://52.79.189.195/nova-thon/basket/folder/insert.php")
                                         .setCallback(new Callback() {
                                             @Override
                                             public void onFailure(Call call, IOException e) {
@@ -165,13 +353,13 @@ public class MainActivity extends AppCompatActivity
 //                                                for(int i=0; i<adapter_nav.getCount(); i++) {
 //                                                    adapter_nav.removeItem(i);
 //                                                }
-                                                 adapter.clear();
+                                                adapter.clear();
                                                 adapter_nav.clear();
                                                 Log.e("TAG", String.valueOf(adapter_nav.getCount()));
 
 
-                                                HttpUtil httpUtil = new HttpUtil();
-                                                httpUtil.setUrl("http://52.79.189.195/nova-thon/basket/folder/select.php")
+                                                HttpUtil httpUtil5 = new HttpUtil();
+                                                httpUtil5.setUrl("http://52.79.189.195/nova-thon/basket/folder/select.php")
                                                         .setCallback(new Callback() {
                                                             @Override
                                                             public void onFailure(Call call, IOException e) {
@@ -183,13 +371,13 @@ public class MainActivity extends AppCompatActivity
 //                        Log.e("RESPONSE", response.body().string());
                                                                 try {
                                                                     JSONArray jarray = new JSONArray(response.body().string());
-                                                                    for(int i=0; i < jarray.length(); i++){
+                                                                    for (int i = 0; i < jarray.length(); i++) {
                                                                         final JSONObject jObject = jarray.getJSONObject(i);  // JSONObject 추출
                                                                         handler.post(new Runnable() {
                                                                             @Override
                                                                             public void run() {
                                                                                 try {
-                                                                                    adapter_nav.addItem(jObject.getString("folder") );
+                                                                                    adapter_nav.addItem(jObject.getString("folder"));
                                                                                 } catch (JSONException e) {
                                                                                     e.printStackTrace();
                                                                                 }
@@ -219,20 +407,8 @@ public class MainActivity extends AppCompatActivity
         });
 
 
-
-
-
-
-
-
-
-
-        listView =  (ListView) findViewById(R.id.main_Listview);
+        listView = (ListView) findViewById(R.id.main_Listview);
         listView.setAdapter(adapter);
-
-        adapter.addItem("여행갈 때 차에서 들려주는 동요 상어 가족 외 43곡 모음집 핑크퐁! 인기동요","youtube.com");
-        adapter.addItem("hello","hello");
-        adapter.notifyDataSetChanged();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -243,7 +419,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         this.setTitle("");
-
 
     }
 
@@ -302,5 +477,11 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    protected void onResume() {
+        super.onResume();
+
+
     }
 }
